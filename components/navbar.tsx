@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Fragment, useEffect, useState } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import {
@@ -8,35 +9,42 @@ import {
 } from '@heroicons/react/24/outline'
 import { User } from '@supabase/supabase-js'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 const navigation = [
-  { id: 'home', name: 'Home', href: '#' },
-  { id: 'posts', name: 'Your posts', href: '#' },
-  { id: 'requests', name: 'Requests', href: '#' }
+  { id: 'home', name: 'Home', href: '/' },
+  { id: 'posts', name: 'Your posts', href: '/posts' },
+  { id: 'requests', name: 'Requests', href: '/requests' }
 ]
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Navbar(props: { current: string }) {
+export default function Navbar() {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
+  const router = useRouter()
 
   const [menuOptions, setMenuOptions] = useState([
-    { id: 'home', name: 'Home', href: '#' }
+    { id: '', name: 'Home', href: '/' }
   ])
+
+  //   useEffect(() => {
+  //     console.log('router => ', router.route.split('/')[1])
+  //   }, [router])
 
   useEffect(() => {
     if (user != null) {
-      console.log(user)
+      //   console.log(user)
       setMenuOptions([
-        { id: 'home', name: 'Home', href: '#' },
-        { id: 'posts', name: 'Your posts', href: '#' },
-        { id: 'requests', name: 'Requests', href: '#' }
+        { id: '', name: 'Home', href: '/' },
+        { id: 'posts', name: 'Your posts', href: '/posts' },
+        { id: 'requests', name: 'Requests', href: '/requests' }
       ])
     } else {
-      setMenuOptions([{ id: 'home', name: 'Home', href: '#' }])
+      setMenuOptions([{ id: '', name: 'Home', href: '/' }])
     }
   }, [user])
 
@@ -77,34 +85,36 @@ export default function Navbar(props: { current: string }) {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
                     {menuOptions.map((item) => (
-                      <a
+                      <Link
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.id === props.current
+                          item.id === router.route.split('/')[1]
                             ? 'bg-gray-900 text-white'
                             : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                           'px-3 py-2 rounded-md text-sm font-medium'
                         )}
                         aria-current={
-                          item.id === props.current ? 'page' : undefined
+                          item.id === router.route.split('/')[1]
+                            ? 'page'
+                            : undefined
                         }
                       >
                         {item.name}
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>
               </div>
               {user ? (
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                  <button
+                  {/* <button
                     type="button"
                     className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                   >
                     <span className="sr-only">View notifications</span>
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
+                  </button> */}
 
                   {/* Profile dropdown */}
                   <Menu as="div" className="relative ml-3">
@@ -185,7 +195,10 @@ export default function Navbar(props: { current: string }) {
                   onClick={login}
                   className="px-3 py-2 rounded-md text-sm font-medium bg-gray-900 text-white"
                 >
-                  Login
+                  Login{' '}
+                  <span className="text-white" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </button>
               )}
             </div>
@@ -196,15 +209,17 @@ export default function Navbar(props: { current: string }) {
               {menuOptions.map((item) => (
                 <Disclosure.Button
                   key={item.name}
-                  as="a"
+                  as={Link}
                   href={item.href}
                   className={classNames(
-                    item.id === props.current
+                    item.id === router.route.split('/')[1]
                       ? 'bg-gray-900 text-white'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                     'block px-3 py-2 rounded-md text-base font-medium'
                   )}
-                  aria-current={item.id === props.current ? 'page' : undefined}
+                  aria-current={
+                    item.id === router.route.split('/')[1] ? 'page' : undefined
+                  }
                 >
                   {item.name}
                 </Disclosure.Button>

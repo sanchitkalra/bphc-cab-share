@@ -21,7 +21,7 @@ export default function App({
       initialSession={pageProps.initialSession}
     >
       <>
-        <Navbar current="home" />
+        <Navbar />
         <Component {...pageProps} />
       </>
     </SessionContextProvider>

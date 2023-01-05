@@ -1,9 +1,6 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
-import { useEffect } from 'react'
-import Navbar from '../components/navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,7 +16,73 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>{/* <Navbar current="home" /> */}</main>
+      <main className="flex flex-col items-center mb-6">
+        <h1 className="text-4xl md:text-6xl text-center mt-6 font-bold">
+          Find a cab and fast
+        </h1>
+
+        <div className="flex flex-col md:flex-row justify-center mt-12">
+          <button className="border-2 p-2 rounded m-2">
+            <h2 className="text-xl text-left">FROM</h2>
+            {/* <h2 className="w-72 font-semibold text-3xl text-left">AIRPORT</h2> */}
+            <input
+              className="w-72 font-semibold text-3xl text-left focus:outline-0"
+              type="text"
+              placeholder="AIRPORT"
+            />
+          </button>
+          <button className="border-2 p-2 rounded m-2">
+            <h2 className="text-xl text-left">TO</h2>
+            {/* <h2 className="w-72 font-semibold text-3xl text-left">CAMPUS</h2> */}
+            <input
+              className="w-72 font-semibold text-3xl text-left focus:outline-0"
+              type="text"
+              placeholder="CAMPUS"
+            />
+          </button>
+        </div>
+        <div className="flex flex-col md:flex-row justify-center md:mt-6">
+          <button className="border-2 p-2 rounded m-2">
+            <h2 className="text-xl text-left">ON</h2>
+            {/* <h2 className="w-72 font-semibold text-3xl text-left">
+              15th Jan 2022
+            </h2> */}
+            <input
+              className="w-72 font-semibold text-3xl text-left focus:outline-0"
+              type="date"
+              placeholder="15th Jan 2022"
+            />
+          </button>
+          <button className="border-2 p-2 rounded m-2">
+            <h2 className="text-xl text-left">AT</h2>
+            {/* <h2 className="w-72 font-semibold text-3xl text-left">5:00PM</h2> */}
+            <input
+              className="w-72 font-semibold text-3xl text-left focus:outline-0"
+              type="time"
+              placeholder="5:00PM"
+            />
+          </button>
+        </div>
+        <div className="flex flex-col md:flex-row justify-center md:mt-6">
+          <button className="border-2 p-2 rounded m-2">
+            <h2 className="text-xl text-left">WAITING/LEAVING EARLY UPTO</h2>
+            {/* <h2 className="w-72 font-semibold text-3xl text-left">
+              60 MINUTES
+            </h2> */}
+            <input
+              className="w-72 font-semibold text-3xl text-left focus:outline-0"
+              type="number"
+              placeholder="Eg. 60 MINUTES"
+            />
+          </button>
+        </div>
+        <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+          SEARCH{' '}
+          <span className="text-white" aria-hidden="true">
+            &rarr;
+          </span>
+        </button>
+      </main>
     </>
   )
 }
