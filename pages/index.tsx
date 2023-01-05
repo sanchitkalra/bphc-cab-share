@@ -1,12 +1,53 @@
 import Head from 'next/head'
 import { Inter } from '@next/font/google'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
+import { useEffect, useState, Fragment } from 'react'
+import { Menu, Transition } from '@headlessui/react'
+import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
 const inter = Inter({ subsets: ['latin'] })
+
+type ISearch = {
+  from: string
+  to: string
+  on: string
+  at: string
+  threshold: number
+}
 
 export default function Home() {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
+
+  const [search, setSearch] = useState<ISearch>({
+    from: '',
+    to: '',
+    on: (() => {
+      const date = new Date()
+      const month = date.getMonth() + 1
+      const day = date.getDay() + 1
+      return `${date.getFullYear()}-${
+        month.toString().length == 1 ? `0${month}` : month
+      }-${day.toString().length == 1 ? `0${day}` : day}`
+    })(),
+    at: (() => {
+      const date = new Date()
+      return `${
+        date.getHours().toString().length == 1
+          ? `0${date.getHours()}`
+          : date.getHours()
+      }:${
+        date.getMinutes().toString().length == 1
+          ? `0${date.getMinutes()}`
+          : date.getMinutes()
+      }`
+    })(),
+    threshold: 0
+  })
+
+  useEffect(() => {
+    console.log(search)
+  }, [search])
 
   return (
     <>
@@ -22,27 +63,35 @@ export default function Home() {
         </h1>
 
         <div className="flex flex-col md:flex-row justify-center mt-12">
-          <button className="border-2 p-2 rounded m-2">
+          <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">FROM</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">AIRPORT</h2> */}
             <input
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="text"
               placeholder="AIRPORT"
+              value={search.from}
+              onChange={(event) =>
+                setSearch({ ...search, from: event.target.value })
+              }
             />
-          </button>
-          <button className="border-2 p-2 rounded m-2">
+          </div>
+          <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">TO</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">CAMPUS</h2> */}
             <input
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="text"
               placeholder="CAMPUS"
+              value={search.to}
+              onChange={(event) =>
+                setSearch({ ...search, to: event.target.value })
+              }
             />
-          </button>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row justify-center md:mt-6">
-          <button className="border-2 p-2 rounded m-2">
+          <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">ON</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">
               15th Jan 2022
@@ -51,30 +100,48 @@ export default function Home() {
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="date"
               placeholder="15th Jan 2022"
+              value={search.on}
+              onChange={(event) =>
+                setSearch({ ...search, on: event.target.value })
+              }
             />
-          </button>
-          <button className="border-2 p-2 rounded m-2">
+          </div>
+          <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">AT</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">5:00PM</h2> */}
             <input
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="time"
               placeholder="5:00PM"
+              value={search.at}
+              onChange={(event) =>
+                setSearch({ ...search, at: event.target.value })
+              }
             />
-          </button>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row justify-center md:mt-6">
-          <button className="border-2 p-2 rounded m-2">
+          <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">WAITING/LEAVING EARLY UPTO</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">
               60 MINUTES
             </h2> */}
-            <input
-              className="w-72 font-semibold text-3xl text-left focus:outline-0"
-              type="number"
-              placeholder="Eg. 60 MINUTES"
-            />
-          </button>
+            <div className="flex flex-row items-center">
+              <input
+                className="w-16 font-semibold text-3xl text-left focus:outline-0"
+                type="number"
+                placeholder="Eg. 60 MINUTES"
+                value={search.threshold}
+                onChange={(event) =>
+                  setSearch({
+                    ...search,
+                    threshold: Number(event.target.value)
+                  })
+                }
+              />
+              <h2>MINUTES</h2>
+            </div>
+          </div>
         </div>
         <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
           SEARCH{' '}
