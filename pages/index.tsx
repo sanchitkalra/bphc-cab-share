@@ -2,10 +2,16 @@ import Head from 'next/head'
 import { Inter } from '@next/font/google'
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import { useEffect, useState, Fragment } from 'react'
-import { Menu, Transition } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { Combobox, Transition } from '@headlessui/react'
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
 const inter = Inter({ subsets: ['latin'] })
+
+const people: { id: number; name: string }[] = [
+  { id: 1, name: 'Airport' },
+  { id: 2, name: 'Railway Station' },
+  { id: 3, name: 'Campus' }
+]
 
 type ISearch = {
   from: string
@@ -49,6 +55,19 @@ export default function Home() {
     console.log(search)
   }, [search])
 
+  const [selected, setSelected] = useState(people[0])
+  const [query, setQuery] = useState('')
+
+  const filteredPeople =
+    query === ''
+      ? people
+      : people.filter((person) =>
+          person.name
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .includes(query.toLowerCase().replace(/\s+/g, ''))
+        )
+
   return (
     <>
       <Head>
@@ -66,7 +85,7 @@ export default function Home() {
           <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">FROM</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">AIRPORT</h2> */}
-            <input
+            {/* <input
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="text"
               placeholder="AIRPORT"
@@ -74,12 +93,85 @@ export default function Home() {
               onChange={(event) =>
                 setSearch({ ...search, from: event.target.value })
               }
-            />
+            /> */}
+            <Combobox value={selected} onChange={setSelected}>
+              <div className="relative mt-1 w-72">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left sm:text-sm focus:ring-0">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-xl font-semibold leading-5 text-gray-900 focus:ring-0"
+                    displayValue={(person: { id: number; name: string }) =>
+                      person.name
+                    }
+                    onChange={(event) => setQuery(event.target.value)}
+                    style={{ outline: 'none' }}
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => setQuery('')}
+                >
+                  <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {filteredPeople.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Nothing found.
+                      </div>
+                    ) : (
+                      filteredPeople.map((person) => (
+                        <Combobox.Option
+                          key={person.id}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-900'
+                            }`
+                          }
+                          value={person}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? 'font-medium' : 'font-normal'
+                                }`}
+                              >
+                                {person.name}
+                              </span>
+                              {selected ? (
+                                <span
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                    active ? 'text-white' : 'text-teal-600'
+                                  }`}
+                                >
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Combobox.Option>
+                      ))
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+            </Combobox>
           </div>
           <div className="border-2 p-2 rounded m-2">
             <h2 className="text-xl text-left">TO</h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">CAMPUS</h2> */}
-            <input
+            {/* <input
               className="w-72 font-semibold text-3xl text-left focus:outline-0"
               type="text"
               placeholder="CAMPUS"
@@ -87,7 +179,80 @@ export default function Home() {
               onChange={(event) =>
                 setSearch({ ...search, to: event.target.value })
               }
-            />
+            /> */}
+            <Combobox value={selected} onChange={setSelected}>
+              <div className="relative mt-1 w-72">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left sm:text-sm focus:ring-0">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-xl font-semibold leading-5 text-gray-900 focus:ring-0"
+                    displayValue={(person: { id: number; name: string }) =>
+                      person.name
+                    }
+                    onChange={(event) => setQuery(event.target.value)}
+                    style={{ outline: 'none' }}
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => setQuery('')}
+                >
+                  <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {filteredPeople.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                        Nothing found.
+                      </div>
+                    ) : (
+                      filteredPeople.map((person) => (
+                        <Combobox.Option
+                          key={person.id}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-900'
+                            }`
+                          }
+                          value={person}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? 'font-medium' : 'font-normal'
+                                }`}
+                              >
+                                {person.name}
+                              </span>
+                              {selected ? (
+                                <span
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                    active ? 'text-white' : 'text-teal-600'
+                                  }`}
+                                >
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Combobox.Option>
+                      ))
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+            </Combobox>
           </div>
         </div>
         <div className="flex flex-col md:flex-row justify-center md:mt-6">
