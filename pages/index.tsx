@@ -4,18 +4,17 @@ import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import { useEffect, useState, Fragment } from 'react'
 import { Combobox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const people: { id: number; name: string }[] = [
+const places: { id: number; name: string }[] = [
   { id: 1, name: 'Airport' },
   { id: 2, name: 'Railway Station' },
   { id: 3, name: 'Campus' }
 ]
 
 type ISearch = {
-  from: string
-  to: string
   on: string
   at: string
   threshold: number
@@ -26,8 +25,6 @@ export default function Home() {
   const user = useUser()
 
   const [search, setSearch] = useState<ISearch>({
-    from: '',
-    to: '',
     on: (() => {
       const date = new Date()
       const month = date.getMonth() + 1
@@ -51,22 +48,64 @@ export default function Home() {
     threshold: 0
   })
 
+  // useEffect(() => {
+  //   console.log(search)
+  // }, [search])
+
+  const [selections, setSelections] = useState({
+    from: places[0],
+    fromQuery: '',
+    to: places[2],
+    toQuery: ''
+  })
+
+  const [filteredResults, setFilteredResults] = useState({
+    from: places,
+    to: places
+  })
+
   useEffect(() => {
-    console.log(search)
-  }, [search])
+    setFilteredResults({
+      from:
+        selections.fromQuery === ''
+          ? places
+          : places.filter((place) =>
+              place.name
+                .toLowerCase()
+                .replace(/\s+/g, '')
+                .includes(
+                  selections.fromQuery.toLowerCase().replace(/\s+/g, '')
+                )
+            ),
+      to:
+        selections.toQuery === ''
+          ? places
+          : places.filter((place) =>
+              place.name
+                .toLowerCase()
+                .replace(/\s+/g, '')
+                .includes(selections.toQuery.toLowerCase().replace(/\s+/g, ''))
+            )
+    })
+  }, [selections.fromQuery, selections.toQuery])
 
-  const [selected, setSelected] = useState(people[0])
-  const [query, setQuery] = useState('')
+  // useEffect(() => {
+  //   console.log('selections => ', selections)
+  //   console.log('filteredResults => ', filteredResults)
+  // }, [selections, filteredResults])
 
-  const filteredPeople =
-    query === ''
-      ? people
-      : people.filter((person) =>
-          person.name
-            .toLowerCase()
-            .replace(/\s+/g, '')
-            .includes(query.toLowerCase().replace(/\s+/g, ''))
-        )
+  // const [selected, setSelected] = useState(places[0])
+  // const [query, setQuery] = useState('')
+
+  // const filteredPlaces =
+  //   query === ''
+  //     ? places
+  //     : places.filter((place) =>
+  //         place.name
+  //           .toLowerCase()
+  //           .replace(/\s+/g, '')
+  //           .includes(query.toLowerCase().replace(/\s+/g, ''))
+  //       )
 
   return (
     <>
@@ -94,15 +133,25 @@ export default function Home() {
                 setSearch({ ...search, from: event.target.value })
               }
             /> */}
-            <Combobox value={selected} onChange={setSelected}>
-              <div className="relative mt-1 w-72">
+            <Combobox
+              value={selections.from}
+              onChange={(result) =>
+                setSelections({ ...selections, from: result })
+              }
+            >
+              <div className="relative mt-1 w-72 z-20">
                 <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left sm:text-sm focus:ring-0">
                   <Combobox.Input
                     className="w-full border-none py-2 pl-3 pr-10 text-xl font-semibold leading-5 text-gray-900 focus:ring-0"
-                    displayValue={(person: { id: number; name: string }) =>
-                      person.name
+                    displayValue={(place: { id: number; name: string }) =>
+                      place.name
                     }
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) =>
+                      setSelections({
+                        ...selections,
+                        fromQuery: event.target.value
+                      })
+                    }
                     style={{ outline: 'none' }}
                   />
                   <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -117,17 +166,20 @@ export default function Home() {
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
-                  afterLeave={() => setQuery('')}
+                  afterLeave={() =>
+                    setSelections({ ...selections, fromQuery: '' })
+                  }
                 >
                   <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                    {filteredPeople.length === 0 && query !== '' ? (
+                    {filteredResults.from.length === 0 &&
+                    selections.fromQuery !== '' ? (
                       <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Nothing found.
                       </div>
                     ) : (
-                      filteredPeople.map((person) => (
+                      filteredResults.from.map((place) => (
                         <Combobox.Option
-                          key={person.id}
+                          key={place.id}
                           className={({ active }) =>
                             `relative cursor-default select-none py-2 pl-10 pr-4 ${
                               active
@@ -135,7 +187,7 @@ export default function Home() {
                                 : 'text-gray-900'
                             }`
                           }
-                          value={person}
+                          value={place}
                         >
                           {({ selected, active }) => (
                             <>
@@ -144,7 +196,7 @@ export default function Home() {
                                   selected ? 'font-medium' : 'font-normal'
                                 }`}
                               >
-                                {person.name}
+                                {place.name}
                               </span>
                               {selected ? (
                                 <span
@@ -180,15 +232,25 @@ export default function Home() {
                 setSearch({ ...search, to: event.target.value })
               }
             /> */}
-            <Combobox value={selected} onChange={setSelected}>
-              <div className="relative mt-1 w-72">
+            <Combobox
+              value={selections.to}
+              onChange={(result) =>
+                setSelections({ ...selections, to: result })
+              }
+            >
+              <div className="relative mt-1 w-72 z-10">
                 <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left sm:text-sm focus:ring-0">
                   <Combobox.Input
                     className="w-full border-none py-2 pl-3 pr-10 text-xl font-semibold leading-5 text-gray-900 focus:ring-0"
-                    displayValue={(person: { id: number; name: string }) =>
-                      person.name
+                    displayValue={(place: { id: number; name: string }) =>
+                      place.name
                     }
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) =>
+                      setSelections({
+                        ...selections,
+                        toQuery: event.target.value
+                      })
+                    }
                     style={{ outline: 'none' }}
                   />
                   <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -203,17 +265,20 @@ export default function Home() {
                   leave="transition ease-in duration-100"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
-                  afterLeave={() => setQuery('')}
+                  afterLeave={() =>
+                    setSelections({ ...selections, toQuery: '' })
+                  }
                 >
                   <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                    {filteredPeople.length === 0 && query !== '' ? (
+                    {filteredResults.to.length === 0 &&
+                    selections.toQuery !== '' ? (
                       <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                         Nothing found.
                       </div>
                     ) : (
-                      filteredPeople.map((person) => (
+                      filteredResults.to.map((place) => (
                         <Combobox.Option
-                          key={person.id}
+                          key={place.id}
                           className={({ active }) =>
                             `relative cursor-default select-none py-2 pl-10 pr-4 ${
                               active
@@ -221,7 +286,7 @@ export default function Home() {
                                 : 'text-gray-900'
                             }`
                           }
-                          value={person}
+                          value={place}
                         >
                           {({ selected, active }) => (
                             <>
@@ -230,7 +295,7 @@ export default function Home() {
                                   selected ? 'font-medium' : 'font-normal'
                                 }`}
                               >
-                                {person.name}
+                                {place.name}
                               </span>
                               {selected ? (
                                 <span
@@ -296,6 +361,7 @@ export default function Home() {
                 className="w-16 font-semibold text-3xl text-left focus:outline-0"
                 type="number"
                 placeholder="Eg. 60 MINUTES"
+                min={0}
                 value={search.threshold}
                 onChange={(event) =>
                   setSearch({
@@ -308,12 +374,16 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
-          SEARCH{' '}
-          <span className="text-white" aria-hidden="true">
-            &rarr;
-          </span>
-        </button>
+        <Link
+          href={`/search?from=${selections.from.name}&to=${selections.to.name}&date=${search.on}&time=${search.at}&threshold=${search.threshold}`}
+        >
+          <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+            SEARCH{' '}
+            <span className="text-white" aria-hidden="true">
+              &rarr;
+            </span>
+          </button>
+        </Link>
       </main>
     </>
   )
