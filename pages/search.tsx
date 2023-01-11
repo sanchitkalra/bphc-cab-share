@@ -1,6 +1,7 @@
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react'
 import moment from 'moment'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -9,7 +10,9 @@ export default function Posts() {
   const router = useRouter()
   const supabaseClient = useSupabaseClient()
 
-  const [searchResults, setSearchResults] = useState<any>([])
+  const [searchResults, setSearchResults] = useState<Array<Object> | null>(null)
+  const [seats, setSeats] = useState(0)
+  const [postMode, setPostMode] = useState(false)
 
   const search = router.query
   //   console.log(search)
@@ -21,8 +24,10 @@ export default function Posts() {
         const { data, error } = await supabaseClient
           .from('ride_requests')
           .select()
+          .eq('from', search.from)
+          .eq('to', search.to)
 
-        // console.log(data, error)
+        console.log(data, error)
         setSearchResults(data)
 
         // const { error } = await supabaseClient.from('ride_requests').insert({
@@ -35,7 +40,7 @@ export default function Posts() {
         //   seats: 4
         // })
 
-        console.log(error)
+        // console.log(error)
       }
 
       fn()
@@ -51,67 +56,160 @@ export default function Posts() {
         <h1 className="text-4xl md:text-6xl text-center mt-6 font-bold">
           Search Results
         </h1>
-        <h2 className="font-semibold">
-          {search.from} to {search.to} on {search.date} at {search.time}
+        <h2 className="font-semibold w-80 text-center">
+          {search.from} to {search.to} on {search.date} at {search.time} waiting
+          upto {search.threshold} minutes{' '}
+          <Link className="text-blue-900 underline" href={'/'}>
+            edit
+          </Link>
         </h2>
-        {searchResults.length >= 1 ? (
-          <div className="mt-4">
-            {searchResults.map((result: any) => {
-              const dt = moment(result.time).toDate()
-              console.log(
-                dt.getDate(),
-                dt.getMonth() + 1,
-                dt.getFullYear(),
-                dt.getTimezoneOffset(),
-                dt.getHours(),
-                dt.getMinutes()
-              )
-
-              return (
-                <div
-                  className="w-80 sm:w-96 m-2 rounded shadow p-2 border-2"
-                  key={result.id}
-                >
-                  <div className="flex flex-row justify-between">
-                    <h3 className="font-semibold text-xl w-3/5">
-                      {result.from} <span aria-hidden="true">&rarr;</span>{' '}
-                      {result.to}
-                    </h3>
-                    <div className="flex flex-col items-end font-semibold w-2/5">
-                      <h3>
-                        {dt.getDate().toString().length == 1
-                          ? `0${dt.getDate()}`
-                          : dt.getDate()}
-                        -
-                        {(dt.getMonth() + 1).toString().length == 1
-                          ? `0${dt.getMonth() + 1}`
-                          : dt.getMonth() + 1}
-                        -{dt.getFullYear()}
-                      </h3>
-                      <h3>
-                        {dt.getHours().toString().length == 1
-                          ? `0${dt.getHours()}`
-                          : dt.getHours()}
-                        :
-                        {dt.getMinutes().toString().length == 1
-                          ? `0${dt.getMinutes()}`
-                          : dt.getMinutes()}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-row justify-end w-full">
-                    <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
-                      REQUEST{' '}
+        {searchResults != null ? (
+          searchResults.length === 0 ? (
+            <div className="grid h-screen place-items-center">
+              <div className="flex flex-col items-center">
+                <h2 className="font-semibold mb-10">No results</h2>
+                {postMode ? (
+                  <div className="flex flex-col items-center p-4 border rounded">
+                    <input
+                      className="w-80 border rounded p-2"
+                      placeholder="Seats to offer?"
+                      type="number"
+                      min={0}
+                    />
+                    <button
+                      className="text-xs mt-2 inline-block rounded bg-gray-800 px-3 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        setPostMode(false)
+                      }}
+                    >
+                      POST{' '}
                       <span className="text-white" aria-hidden="true">
                         &rarr;
                       </span>
                     </button>
                   </div>
+                ) : (
+                  <button
+                    className="text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      setPostMode(true)
+                    }}
+                  >
+                    POST A REQUEST{' '}
+                    <span className="text-white" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </button>
+                )}
+                <h2 className="font-semibold mt-2">OR</h2>
+                <Link href={'/'}>
+                  <button className="text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+                    START A NEW SEARCH{' '}
+                    <span className="text-white" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4">
+              {postMode ? (
+                <div className="w-80 flex flex-col items-center p-4 border rounded">
+                  <input
+                    className="w-full border rounded p-2"
+                    placeholder="Seats to offer?"
+                    type="number"
+                    min={0}
+                  />
+                  <button
+                    className="text-xs mt-2 inline-block rounded bg-gray-800 px-3 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      setPostMode(false)
+                    }}
+                  >
+                    POST{' '}
+                    <span className="text-white" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </button>
                 </div>
-              )
-            })}
-          </div>
+              ) : (
+                <div className="flex flex-row justify-center">
+                  <button
+                    className="text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      setPostMode(true)
+                    }}
+                  >
+                    POST A REQUEST{' '}
+                    <span className="text-white" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </button>
+                </div>
+              )}
+              {searchResults.map((result: any) => {
+                const dt = moment(result.time).toDate()
+                console.log(
+                  dt.getDate(),
+                  dt.getMonth() + 1,
+                  dt.getFullYear(),
+                  dt.getTimezoneOffset(),
+                  dt.getHours(),
+                  dt.getMinutes()
+                )
+
+                return (
+                  <div
+                    className="w-80 sm:w-96 mt-4 rounded shadow p-2 border-2"
+                    key={result.id}
+                  >
+                    <div className="flex flex-row justify-between">
+                      <h3 className="font-semibold text-xl w-3/5">
+                        {result.from} <span aria-hidden="true">&rarr;</span>{' '}
+                        {result.to}
+                      </h3>
+                      <div className="flex flex-col items-end font-semibold w-2/5">
+                        <h3>
+                          {dt.getDate().toString().length == 1
+                            ? `0${dt.getDate()}`
+                            : dt.getDate()}
+                          -
+                          {(dt.getMonth() + 1).toString().length == 1
+                            ? `0${dt.getMonth() + 1}`
+                            : dt.getMonth() + 1}
+                          -{dt.getFullYear()}
+                        </h3>
+                        <h3>
+                          {dt.getHours().toString().length == 1
+                            ? `0${dt.getHours()}`
+                            : dt.getHours()}
+                          :
+                          {dt.getMinutes().toString().length == 1
+                            ? `0${dt.getMinutes()}`
+                            : dt.getMinutes()}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row justify-end w-full">
+                      <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+                        REQUEST{' '}
+                        <span className="text-white" aria-hidden="true">
+                          &rarr;
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
         ) : (
           <div className="grid h-screen place-items-center">
             <div role="status">
