@@ -72,23 +72,40 @@ export default function Posts() {
                   className="w-80 sm:w-96 m-2 rounded shadow p-2 border-2"
                   key={result.id}
                 >
-                  <h3>FROM: {result.from}</h3>
-                  <h3>TO: {result.to}</h3>
-                  <h3>ON: {result.date}</h3>
-                  <h3>
-                    AT:{' '}
-                    {dt.getHours().toString().length == 1
-                      ? `0${dt.getHours()}`
-                      : dt.getHours()}
-                    :
-                    {dt.getMinutes().toString().length == 1
-                      ? `0${dt.getMinutes()}`
-                      : dt.getMinutes()}
-                  </h3>
+                  <div className="flex flex-row justify-between">
+                    <h3 className="font-semibold text-xl w-3/5">
+                      {result.from} <span aria-hidden="true">&rarr;</span>{' '}
+                      {result.to}
+                    </h3>
+                    <div className="flex flex-col items-end font-semibold w-2/5">
+                      <h3>
+                        {dt.getDate().toString().length == 1
+                          ? `0${dt.getDate()}`
+                          : dt.getDate()}
+                        -
+                        {(dt.getMonth() + 1).toString().length == 1
+                          ? `0${dt.getMonth() + 1}`
+                          : dt.getMonth() + 1}
+                        -{dt.getFullYear()}
+                      </h3>
+                      <h3>
+                        {dt.getHours().toString().length == 1
+                          ? `0${dt.getHours()}`
+                          : dt.getHours()}
+                        :
+                        {dt.getMinutes().toString().length == 1
+                          ? `0${dt.getMinutes()}`
+                          : dt.getMinutes()}
+                      </h3>
+                    </div>
+                  </div>
 
-                  <div className="flex flex-row justify-end">
-                    <button className="bg-gray-800 p-2 rounded text-white">
-                      SHARE
+                  <div className="flex flex-row justify-end w-full">
+                    <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+                      REQUEST{' '}
+                      <span className="text-white" aria-hidden="true">
+                        &rarr;
+                      </span>
                     </button>
                   </div>
                 </div>
