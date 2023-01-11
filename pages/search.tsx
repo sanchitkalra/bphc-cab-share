@@ -13,9 +13,14 @@ export default function Posts() {
   const [searchResults, setSearchResults] = useState<Array<Object> | null>(null)
   const [seats, setSeats] = useState(0)
   const [postMode, setPostMode] = useState(false)
+  const [postResult, setPostResult] = useState({
+    message: '',
+    status: 'none'
+  })
 
   const search = router.query
   //   console.log(search)
+  //   console.log(user)
 
   useEffect(() => {
     // console.log(search)
@@ -27,7 +32,7 @@ export default function Posts() {
           .eq('from', search.from)
           .eq('to', search.to)
 
-        console.log(data, error)
+        // console.log(data, error)
         setSearchResults(data)
 
         // const { error } = await supabaseClient.from('ride_requests').insert({
@@ -45,7 +50,48 @@ export default function Posts() {
 
       fn()
     }
-  }, [user, router, supabaseClient])
+  }, [user, router, supabaseClient, search.from, search.to])
+
+  const addPost = () => {
+    ;(async () => {
+      setPostResult({
+        message: 'Requesting the universe for a cab',
+        status: 'progress'
+      })
+
+      if (seats <= 0) {
+        setPostResult({
+          message: 'At least 1 seat must be offered',
+          status: 'failed'
+        })
+        return
+      }
+
+      const { error } = await supabaseClient.from('ride_requests').insert({
+        user_name: user?.user_metadata.full_name,
+        user_email: user?.email,
+        from: search.from,
+        to: search.to,
+        time: new Date(),
+        tolerance: search.threshold,
+        seats
+      })
+
+      if (error) {
+        setPostResult({
+          message: 'Post Failed',
+          status: 'failed'
+        })
+        return
+      }
+
+      setPostResult({
+        message: 'Posted Successfully',
+        status: 'ok'
+      })
+      return
+    })()
+  }
 
   return (
     <>
@@ -75,12 +121,15 @@ export default function Posts() {
                       placeholder="Seats to offer?"
                       type="number"
                       min={0}
+                      value={seats}
+                      onChange={(event) => setSeats(Number(event.target.value))}
                     />
                     <button
                       className="text-xs mt-2 inline-block rounded bg-gray-800 px-3 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
                       onClick={(event) => {
                         event.preventDefault()
-                        setPostMode(false)
+                        // setPostMode(false)
+                        addPost()
                       }}
                     >
                       POST{' '}
@@ -88,6 +137,9 @@ export default function Posts() {
                         &rarr;
                       </span>
                     </button>
+                    {postResult.status != 'none' && (
+                      <p className="mt-2">{postResult.message}</p>
+                    )}
                   </div>
                 ) : (
                   <button
@@ -119,16 +171,19 @@ export default function Posts() {
               {postMode ? (
                 <div className="w-80 flex flex-col items-center p-4 border rounded">
                   <input
-                    className="w-full border rounded p-2"
+                    className="w-full border rounded p-2 m-2"
                     placeholder="Seats to offer?"
                     type="number"
                     min={0}
+                    value={seats}
+                    onChange={(event) => setSeats(Number(event.target.value))}
                   />
                   <button
                     className="text-xs mt-2 inline-block rounded bg-gray-800 px-3 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
                     onClick={(event) => {
                       event.preventDefault()
-                      setPostMode(false)
+                      //   setPostMode(false)
+                      addPost()
                     }}
                   >
                     POST{' '}
@@ -136,6 +191,9 @@ export default function Posts() {
                       &rarr;
                     </span>
                   </button>
+                  {postResult.status != 'none' && (
+                    <p className="mt-2">{postResult.message}</p>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-row justify-center">
@@ -169,11 +227,17 @@ export default function Posts() {
                     className="w-80 sm:w-96 mt-4 rounded shadow p-2 border-2"
                     key={result.id}
                   >
-                    <div className="flex flex-row justify-between">
-                      <h3 className="font-semibold text-xl w-3/5">
-                        {result.from} <span aria-hidden="true">&rarr;</span>{' '}
-                        {result.to}
-                      </h3>
+                    <div className="flex flex-row justify-between mb-2">
+                      <div className="w-3/5 flex flex-col">
+                        <h3 className="font-semibold text-xl">
+                          {result.from} <span aria-hidden="true">&rarr;</span>{' '}
+                          {result.to}
+                        </h3>
+                        <h3>{result.user_name}</h3>
+                        <h3>
+                          {result.seats} seat{result.seats > 1 && 's'} available
+                        </h3>
+                      </div>
                       <div className="flex flex-col items-end font-semibold w-2/5">
                         <h3>
                           {dt.getDate().toString().length == 1
