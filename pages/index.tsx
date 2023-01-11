@@ -27,8 +27,10 @@ export default function Home() {
   const [search, setSearch] = useState<ISearch>({
     on: (() => {
       const date = new Date()
+      // console.log(date)
       const month = date.getMonth() + 1
-      const day = date.getDay() + 1
+      const day = date.getDate()
+      console.log(month, day)
       return `${date.getFullYear()}-${
         month.toString().length == 1 ? `0${month}` : month
       }-${day.toString().length == 1 ? `0${day}` : day}`
