@@ -19,7 +19,7 @@ export default function Posts() {
   })
 
   const search = router.query
-  //   console.log(search)
+  console.log(search)
   //   console.log(user)
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function Posts() {
         user_email: user?.email,
         from: search.from,
         to: search.to,
-        time: new Date(),
+        time: new Date(`${search.date}T${search.time}:00`),
         tolerance: search.threshold,
         seats
       })
@@ -169,7 +169,7 @@ export default function Posts() {
           ) : (
             <div className="mt-4">
               {postMode ? (
-                <div className="w-80 flex flex-col items-center p-4 border rounded">
+                <div className="w-80 sm:w-96 flex flex-col items-center p-4 border rounded">
                   <input
                     className="w-full border rounded p-2 m-2"
                     placeholder="Seats to offer?"
