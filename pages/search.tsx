@@ -20,7 +20,7 @@ export default function Posts() {
   })
 
   const search = router.query
-  console.log(search)
+  // console.log(search)
   //   console.log(user)
 
   useEffect(() => {
@@ -141,14 +141,14 @@ export default function Posts() {
                 )}
                 {searchResults.map((result: any) => {
                   const dt = moment(result.time).toDate()
-                  console.log(
-                    dt.getDate(),
-                    dt.getMonth() + 1,
-                    dt.getFullYear(),
-                    dt.getTimezoneOffset(),
-                    dt.getHours(),
-                    dt.getMinutes()
-                  )
+                  // console.log(
+                  //   dt.getDate(),
+                  //   dt.getMonth() + 1,
+                  //   dt.getFullYear(),
+                  //   dt.getTimezoneOffset(),
+                  //   dt.getHours(),
+                  //   dt.getMinutes()
+                  // )
 
                   return (
                     <div
