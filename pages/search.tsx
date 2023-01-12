@@ -23,21 +23,26 @@ export default function Posts() {
 
   useEffect(() => {
     if (user != null && router) {
+      const searchSafe = router.query
       const fn = async () => {
         const { data, error } = await supabaseClient
           .from('ride_requests')
           .select()
-          .eq('from', search.from)
-          .eq('to', search.to)
+          .eq('from', searchSafe.from)
+          .eq('to', searchSafe.to)
+          .gt('seats', 0)
           // .neq('user_email', user.email)
           .order('id')
+          .gte('tolerance', searchSafe.threshold)
 
         setSearchResults(data)
       }
 
-      fn()
+      if (searchSafe.from && searchSafe.from && searchSafe.threshold) {
+        fn()
+      }
     }
-  }, [user, router, supabaseClient, search.from, search.to])
+  }, [user, router, supabaseClient])
 
   const getURL = () => {
     let url =
@@ -205,6 +210,11 @@ export default function Posts() {
                             {dt.getMinutes().toString().length == 1
                               ? `0${dt.getMinutes()}`
                               : dt.getMinutes()}
+                          </h3>
+                          <h3 className="text-end">
+                            {result.tolerance > 0
+                              ? `waiting upto ${result.tolerance}m`
+                              : 'no waiting'}
                           </h3>
                         </div>
                       </div>
