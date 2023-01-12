@@ -29,6 +29,8 @@ export default function Posts() {
           .select()
           .eq('from', search.from)
           .eq('to', search.to)
+          .neq('user_email', user.email)
+          .order('id')
 
         setSearchResults(data)
       }
