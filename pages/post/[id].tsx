@@ -13,8 +13,10 @@ export default function Posts() {
   const [post, setPost] = useState<Array<Object> | null>(null)
   const [responses, setResponses] = useState<Array<Object> | null>(null)
 
+  const [approvalError, setApprovalError] = useState<string | null>(null)
+
   useEffect(() => {
-    if (user != null) {
+    if (user != null && id) {
       const fn = async () => {
         const { data: postData, error: postError } = await supabaseClient
           .from('ride_requests')
@@ -26,7 +28,11 @@ export default function Posts() {
         setPost(postData)
 
         const { data: responsesData, error: responsesError } =
-          await supabaseClient.from('ride_responses').select().eq('postID', id)
+          await supabaseClient
+            .from('ride_responses')
+            .select()
+            .eq('postID', id)
+            .order('id', { ascending: true })
 
         console.log(responsesData, responsesError)
         setResponses(responsesData)
@@ -77,7 +83,6 @@ export default function Posts() {
                             {result.from} <span aria-hidden="true">&rarr;</span>{' '}
                             {result.to}
                           </h3>
-                          <h3>{result.user_name}</h3>
                           <h3>
                             {result.seats} seat{result.seats > 1 && 's'}{' '}
                             available
@@ -179,12 +184,75 @@ export default function Posts() {
                       </div>
 
                       <div className="flex flex-row justify-end w-full">
-                        <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
-                          APPROVE{' '}
-                          <span className="text-white" aria-hidden="true">
-                            &rarr;
-                          </span>
+                        <button
+                          className={`w-full text-sm mt-2 inline-block rounded px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-${
+                            !result.approved && 800
+                          } ${
+                            !result.approved && 'hover:bg-gray-900'
+                          } hover:ring-gray-${
+                            !result.approved && 900
+                          } bg-gray-${result.approved ? 500 : 800}`}
+                          onClick={(event) => {
+                            event.preventDefault()
+                            ;(async () => {
+                              if (post) {
+                                const p: any = post[0]
+                                if (p.seats <= 0) {
+                                  setApprovalError('No seats available')
+                                  return
+                                }
+                                const { error: writeError } =
+                                  await supabaseClient
+                                    .from('ride_requests')
+                                    .update({ seats: p.seats - result.seats })
+                                    .eq('id', p.id)
+
+                                const { error: statusError } =
+                                  await supabaseClient
+                                    .from('ride_responses')
+                                    .update({ approved: true })
+                                    .eq('id', result.id)
+
+                                console.log(writeError, statusError)
+
+                                if (writeError || statusError) {
+                                  setApprovalError(
+                                    'Approval failed, try again in a while'
+                                  )
+                                  return
+                                }
+
+                                if (!writeError && !statusError) {
+                                  console.log('here')
+                                  let r: any = responses
+                                  console.log(r)
+                                  let index = responses.findIndex(
+                                    (val: any) => val.id == result.id
+                                  )
+                                  console.log(index)
+                                  r[index].approved = true
+                                  console.log(r)
+                                  setResponses(r)
+                                }
+                              }
+                            })()
+                          }}
+                          disabled={result.approved}
+                        >
+                          {result.approved ? (
+                            'APPROVED'
+                          ) : (
+                            <p>
+                              APPROVE{' '}
+                              <span className="text-white" aria-hidden="true">
+                                &rarr;
+                              </span>
+                            </p>
+                          )}
                         </button>
+                      </div>
+                      <div className="flex flex-row justify-center mt-1">
+                        <p className="self-center">{approvalError}</p>
                       </div>
                     </div>
                   )

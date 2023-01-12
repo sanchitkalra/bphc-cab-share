@@ -18,6 +18,7 @@ export default function Posts() {
           .from('ride_requests')
           .select()
           .eq('user_email', user.email)
+          .order('id', { ascending: false })
 
         // console.log(data, error)
         setPosts(data)
@@ -106,12 +107,14 @@ export default function Posts() {
                       </div>
 
                       <div className="flex flex-row justify-end w-full">
-                        <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
-                          SEE REQUESTS{' '}
-                          <span className="text-white" aria-hidden="true">
-                            &rarr;
-                          </span>
-                        </button>
+                        <Link href={`/post/${result.id}`} className="w-full">
+                          <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+                            SEE REQUESTS{' '}
+                            <span className="text-white" aria-hidden="true">
+                              &rarr;
+                            </span>
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   )
