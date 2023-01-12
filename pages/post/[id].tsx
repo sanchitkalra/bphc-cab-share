@@ -185,13 +185,7 @@ export default function Posts() {
 
                       <div className="flex flex-row justify-end w-full">
                         <button
-                          className={`w-full text-sm mt-2 inline-block rounded px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-${
-                            !result.approved && 800
-                          } ${
-                            !result.approved && 'hover:bg-gray-900'
-                          } hover:ring-gray-${
-                            !result.approved && 900
-                          } bg-gray-${result.approved ? 500 : 800}`}
+                          className={`w-full text-sm mt-2 inline-block rounded px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900 bg-gray-800`}
                           onClick={(event) => {
                             event.preventDefault()
                             ;(async () => {
