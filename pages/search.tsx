@@ -11,20 +11,17 @@ export default function Posts() {
   const router = useRouter()
   const supabaseClient = useSupabaseClient()
 
+  const [processing, setProcessing] = useState<boolean>(false)
+
   const [searchResults, setSearchResults] = useState<Array<Object> | null>(null)
-  const [seats, setSeats] = useState(0)
+
   const [postMode, setPostMode] = useState(false)
-  const [postResult, setPostResult] = useState({
-    message: '',
-    status: 'none'
-  })
+
+  const [seatsRequested, setSeatsRequested] = useState<number>(0)
 
   const search = router.query
-  // console.log(search)
-  //   console.log(user)
 
   useEffect(() => {
-    // console.log(search)
     if (user != null && router) {
       const fn = async () => {
         const { data, error } = await supabaseClient
@@ -33,7 +30,6 @@ export default function Posts() {
           .eq('from', search.from)
           .eq('to', search.to)
 
-        // console.log(data, error)
         setSearchResults(data)
       }
 
@@ -60,6 +56,22 @@ export default function Posts() {
         redirectTo: getURL()
       }
     })
+  }
+
+  async function sendResponse(postID: number, time: string, tolerance: number) {
+    setProcessing(true)
+    const { error } = await supabaseClient.from('ride_responses').insert({
+      user_name: user?.user_metadata.full_name,
+      user_email: user?.email,
+      time,
+      tolerance,
+      seats: seatsRequested,
+      postID
+    })
+
+    setProcessing(false)
+
+    console.log(error)
   }
 
   return (
@@ -89,6 +101,8 @@ export default function Posts() {
                       search={search}
                       user={user}
                       supabaseClient={supabaseClient}
+                      processing={processing}
+                      setProcessing={setProcessing}
                     />
                   ) : (
                     <button
@@ -97,6 +111,7 @@ export default function Posts() {
                         event.preventDefault()
                         setPostMode(true)
                       }}
+                      disabled={processing}
                     >
                       POST A REQUEST{' '}
                       <span className="text-white" aria-hidden="true">
@@ -122,6 +137,8 @@ export default function Posts() {
                     search={search}
                     user={user}
                     supabaseClient={supabaseClient}
+                    processing={processing}
+                    setProcessing={setProcessing}
                   />
                 ) : (
                   <div className="flex flex-row justify-center">
@@ -191,7 +208,29 @@ export default function Posts() {
                       </div>
 
                       <div className="flex flex-row justify-end w-full">
-                        <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+                        <button
+                          className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
+                          onClick={(event) => {
+                            event.preventDefault()
+
+                            const hours =
+                              dt.getHours().toString().length == 1
+                                ? `0${dt.getHours()}`
+                                : dt.getHours()
+
+                            const minutes =
+                              dt.getMinutes().toString().length == 1
+                                ? `0${dt.getMinutes()}`
+                                : dt.getMinutes()
+
+                            sendResponse(
+                              result.id,
+                              `${hours}:${minutes}`,
+                              Number(search.threshold)
+                            )
+                          }}
+                          disabled={processing}
+                        >
                           REQUEST{' '}
                           <span className="text-white" aria-hidden="true">
                             &rarr;

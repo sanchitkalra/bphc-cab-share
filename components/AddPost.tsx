@@ -4,11 +4,15 @@ import { SupabaseClient, User } from '@supabase/auth-helpers-react'
 export default function AddPost({
   search,
   user,
-  supabaseClient
+  supabaseClient,
+  processing,
+  setProcessing
 }: {
   search: any
   user: User | null
   supabaseClient: SupabaseClient<any, 'public', any>
+  processing: any
+  setProcessing: any
 }) {
   const [seats, setSeats] = useState(0)
   const [postResult, setPostResult] = useState({
@@ -18,6 +22,7 @@ export default function AddPost({
 
   const addPost = () => {
     ;(async () => {
+      setProcessing(true)
       setPostResult({
         message: 'Requesting the universe for a cab',
         status: 'progress'
@@ -28,6 +33,7 @@ export default function AddPost({
           message: 'At least 1 seat must be offered',
           status: 'failed'
         })
+        setProcessing(false)
         return
       }
 
@@ -46,9 +52,11 @@ export default function AddPost({
           message: 'Post Failed',
           status: 'failed'
         })
+        setProcessing(false)
         return
       }
 
+      setProcessing(false)
       setPostResult({
         message: 'Posted Successfully',
         status: 'ok'
@@ -74,6 +82,7 @@ export default function AddPost({
           event.preventDefault()
           addPost()
         }}
+        disabled={processing}
       >
         POST{' '}
         <span className="text-white" aria-hidden="true">
