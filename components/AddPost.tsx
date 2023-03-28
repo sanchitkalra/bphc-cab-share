@@ -44,7 +44,13 @@ export default function AddPost({
         to: search.to,
         time: new Date(`${search.date}T${search.time}:00`).getTime(),
         tolerance: search.threshold,
-        seats
+        seats,
+        thresholded_time:
+          search.from === 'Campus'
+            ? new Date(`${search.date}T${search.time}:00`).getTime() -
+              Number(search.threshold) * 60 * 1000
+            : new Date(`${search.date}T${search.time}:00`).getTime() +
+              Number(search.threshold) * 60 * 1000
       })
 
       if (error) {

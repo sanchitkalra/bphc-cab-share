@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import AddPost from '../components/AddPost'
+import SearchResult from '../components/SearchResult'
 
 export default function Posts() {
   const user = useUser()
@@ -17,8 +18,6 @@ export default function Posts() {
 
   const [postMode, setPostMode] = useState(false)
 
-  const [seatsRequested, setSeatsRequested] = useState<number>(0)
-
   const search = router.query
 
   useEffect(() => {
@@ -26,21 +25,38 @@ export default function Posts() {
     if (user != null && router) {
       const searchSafe = router.query
 
-      const fn = async (lowerDate: number, upperDate: number) => {
-        let threshold = 30 * 60 * 1000 // minutes (actual threshold) * seconds * 1000
-        const { data, error } = await supabaseClient
-          .from('ride_requests')
-          .select()
-          .eq('from', searchSafe.from)
-          .eq('to', searchSafe.to)
-          .gt('seats', 0)
-          // .neq('user_email', user.email)
-          .order('id')
-          // .gte('tolerance', searchSafe.threshold)
-          .gte('time', lowerDate)
-          .lte('time', upperDate)
+      const fn = async (
+        lowerDate: number,
+        upperDate: number,
+        thresholdTime: number
+      ) => {
+        if (searchSafe.from === 'Campus') {
+          const { data, error } = await supabaseClient
+            .from('ride_requests')
+            .select()
+            .eq('from', searchSafe.from)
+            .eq('to', searchSafe.to)
+            .gt('seats', 0)
+            // .neq('user_email', user.email)
+            .order('id')
+            .gte('time', lowerDate)
+            .lte('thresholded_time', thresholdTime)
 
-        setSearchResults(data)
+          setSearchResults(data)
+        } else {
+          const { data, error } = await supabaseClient
+            .from('ride_requests')
+            .select()
+            .eq('from', searchSafe.from)
+            .eq('to', searchSafe.to)
+            .gt('seats', 0)
+            // .neq('user_email', user.email)
+            .order('id')
+            .lte('time', upperDate)
+            .gte('thresholded_time', thresholdTime)
+
+          setSearchResults(data)
+        }
       }
 
       if (
@@ -66,16 +82,11 @@ export default function Posts() {
           upperDate =
             thresholdDate.getTime() + Number(searchSafe.threshold) * 60 * 1000
         }
-        //   const lowerDate =
-        //     thresholdDate.getTime() - Number(searchSafe.threshold) * 60 * 1000
-
-        // const upperDate =
-        //   thresholdDate.getTime() + Number(searchSafe.threshold) * 60 * 1000
 
         console.log(lowerDate)
         console.log(upperDate)
 
-        fn(lowerDate, upperDate)
+        fn(lowerDate, upperDate, thresholdDate.getTime())
       }
     }
   }, [user, router, supabaseClient])
@@ -101,22 +112,6 @@ export default function Posts() {
     })
   }
 
-  async function sendResponse(postID: number, time: string, tolerance: number) {
-    setProcessing(true)
-    const { error } = await supabaseClient.from('ride_responses').insert({
-      user_name: user?.user_metadata.full_name,
-      user_email: user?.email,
-      time: new Date(time).getTime(),
-      tolerance,
-      seats: seatsRequested,
-      postID
-    })
-
-    setProcessing(false)
-
-    console.log(error)
-  }
-
   return (
     <>
       <Head>
@@ -129,7 +124,8 @@ export default function Posts() {
           </h1>
           <h2 className="font-semibold w-80 text-center">
             {search.from} to {search.to} on {search.date} at {search.time}{' '}
-            waiting/leaving early upto {search.threshold} minutes{' '}
+            {search.from === 'Campus' ? 'leaving early by' : 'waiting upto'}{' '}
+            {search.threshold} minutes{' '}
             <Link className="text-blue-900 underline" href={'/'}>
               edit
             </Link>
@@ -201,91 +197,18 @@ export default function Posts() {
                 )}
                 {searchResults.map((result: any) => {
                   const dt = moment(result.time).toDate()
-                  // console.log(
-                  //   dt.getDate(),
-                  //   dt.getMonth() + 1,
-                  //   dt.getFullYear(),
-                  //   dt.getTimezoneOffset(),
-                  //   dt.getHours(),
-                  //   dt.getMinutes()
-                  // )
-
                   return (
-                    <div
-                      className="w-80 sm:w-96 mt-4 rounded shadow p-2 border-2"
+                    <SearchResult
+                      dt={dt}
+                      from={search.from as string}
+                      processing={processing}
+                      result={result}
+                      setProcessing={setProcessing}
+                      supabaseClient={supabaseClient}
+                      threshold={search.threshold as string}
+                      user={user}
                       key={result.id}
-                    >
-                      <div className="flex flex-row justify-between mb-2">
-                        <div className="w-3/5 flex flex-col">
-                          <h3 className="font-semibold text-xl">
-                            {result.from} <span aria-hidden="true">&rarr;</span>{' '}
-                            {result.to}
-                          </h3>
-                          <h3>{result.user_name}</h3>
-                          <h3>
-                            {result.seats} seat{result.seats > 1 && 's'}{' '}
-                            available
-                          </h3>
-                        </div>
-                        <div className="flex flex-col items-end font-semibold w-2/5">
-                          <h3>
-                            {dt.getDate().toString().length == 1
-                              ? `0${dt.getDate()}`
-                              : dt.getDate()}
-                            -
-                            {(dt.getMonth() + 1).toString().length == 1
-                              ? `0${dt.getMonth() + 1}`
-                              : dt.getMonth() + 1}
-                            -{dt.getFullYear()}
-                          </h3>
-                          <h3>
-                            {dt.getHours().toString().length == 1
-                              ? `0${dt.getHours()}`
-                              : dt.getHours()}
-                            :
-                            {dt.getMinutes().toString().length == 1
-                              ? `0${dt.getMinutes()}`
-                              : dt.getMinutes()}
-                          </h3>
-                          <h3 className="text-end">
-                            {result.tolerance > 0
-                              ? `waiting upto ${result.tolerance}m`
-                              : 'no waiting'}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-row justify-end w-full">
-                        <button
-                          className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900"
-                          onClick={(event) => {
-                            event.preventDefault()
-
-                            const hours =
-                              dt.getHours().toString().length == 1
-                                ? `0${dt.getHours()}`
-                                : dt.getHours()
-
-                            const minutes =
-                              dt.getMinutes().toString().length == 1
-                                ? `0${dt.getMinutes()}`
-                                : dt.getMinutes()
-
-                            sendResponse(
-                              result.id,
-                              `${hours}:${minutes}`,
-                              Number(search.threshold)
-                            )
-                          }}
-                          disabled={processing}
-                        >
-                          REQUEST{' '}
-                          <span className="text-white" aria-hidden="true">
-                            &rarr;
-                          </span>
-                        </button>
-                      </div>
-                    </div>
+                    />
                   )
                 })}
               </div>
