@@ -42,7 +42,7 @@ export default function AddPost({
         user_email: user?.email,
         from: search.from,
         to: search.to,
-        time: new Date(`${search.date}T${search.time}:00`),
+        time: new Date(`${search.date}T${search.time}:00`).getTime(),
         tolerance: search.threshold,
         seats
       })

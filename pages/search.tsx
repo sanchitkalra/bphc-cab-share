@@ -22,9 +22,12 @@ export default function Posts() {
   const search = router.query
 
   useEffect(() => {
+    // console.log(new Date().getTime())
     if (user != null && router) {
       const searchSafe = router.query
-      const fn = async () => {
+
+      const fn = async (lowerDate: number, upperDate: number) => {
+        let threshold = 30 * 60 * 1000 // minutes (actual threshold) * seconds * 1000
         const { data, error } = await supabaseClient
           .from('ride_requests')
           .select()
@@ -33,13 +36,46 @@ export default function Posts() {
           .gt('seats', 0)
           // .neq('user_email', user.email)
           .order('id')
-          .gte('tolerance', searchSafe.threshold)
+          // .gte('tolerance', searchSafe.threshold)
+          .gte('time', lowerDate)
+          .lte('time', upperDate)
 
         setSearchResults(data)
       }
 
-      if (searchSafe.from && searchSafe.from && searchSafe.threshold) {
-        fn()
+      if (
+        searchSafe.from &&
+        searchSafe.to &&
+        searchSafe.threshold &&
+        searchSafe.date &&
+        searchSafe.time
+      ) {
+        const thresholdDate = new Date(
+          `${searchSafe.date}T${searchSafe.time}:00`
+        )
+        console.log(thresholdDate.getTime())
+
+        let lowerDate, upperDate
+
+        if (searchSafe.from === 'Campus') {
+          lowerDate =
+            thresholdDate.getTime() - Number(searchSafe.threshold) * 60 * 1000
+          upperDate = thresholdDate.getTime()
+        } else {
+          lowerDate = thresholdDate.getTime()
+          upperDate =
+            thresholdDate.getTime() + Number(searchSafe.threshold) * 60 * 1000
+        }
+        //   const lowerDate =
+        //     thresholdDate.getTime() - Number(searchSafe.threshold) * 60 * 1000
+
+        // const upperDate =
+        //   thresholdDate.getTime() + Number(searchSafe.threshold) * 60 * 1000
+
+        console.log(lowerDate)
+        console.log(upperDate)
+
+        fn(lowerDate, upperDate)
       }
     }
   }, [user, router, supabaseClient])
@@ -70,7 +106,7 @@ export default function Posts() {
     const { error } = await supabaseClient.from('ride_responses').insert({
       user_name: user?.user_metadata.full_name,
       user_email: user?.email,
-      time,
+      time: new Date(time).getTime(),
       tolerance,
       seats: seatsRequested,
       postID
@@ -93,7 +129,7 @@ export default function Posts() {
           </h1>
           <h2 className="font-semibold w-80 text-center">
             {search.from} to {search.to} on {search.date} at {search.time}{' '}
-            waiting upto {search.threshold} minutes{' '}
+            waiting/leaving early upto {search.threshold} minutes{' '}
             <Link className="text-blue-900 underline" href={'/'}>
               edit
             </Link>

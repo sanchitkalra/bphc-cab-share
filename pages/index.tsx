@@ -354,11 +354,17 @@ export default function Home() {
         </div>
         <div className="flex flex-col md:flex-row justify-center md:mt-6">
           <div className="border-2 p-2 rounded m-2">
-            <h2 className="text-xl text-left">WAITING/LEAVING EARLY UPTO</h2>
+            <h2 className="text-xl text-left">
+              {selections.from.name != selections.to.name
+                ? selections.from.name === 'Campus'
+                  ? 'LEAVING EARLY BY'
+                  : 'WAITING UPTO'
+                : 'INVALID SELECTION'}
+            </h2>
             {/* <h2 className="w-72 font-semibold text-3xl text-left">
               60 MINUTES
             </h2> */}
-            <div className="flex flex-row items-center">
+            <div className="flex flex-row items-center w-72">
               <input
                 className="w-16 font-semibold text-3xl text-left focus:outline-0"
                 type="number"
@@ -376,16 +382,23 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <Link
-          href={`/search?from=${selections.from.name}&to=${selections.to.name}&date=${search.on}&time=${search.at}&threshold=${search.threshold}`}
-        >
-          <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
-            SEARCH{' '}
-            <span className="text-white" aria-hidden="true">
-              &rarr;
-            </span>
-          </button>
-        </Link>
+
+        {selections.from.name != selections.to.name ? (
+          <Link
+            href={`/search?from=${selections.from.name}&to=${selections.to.name}&date=${search.on}&time=${search.at}&threshold=${search.threshold}`}
+          >
+            <button className="mt-4 inline-block rounded-lg bg-gray-800 px-4 py-1.5 text-base font-semibold leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
+              SEARCH{' '}
+              <span className="text-white" aria-hidden="true">
+                &rarr;
+              </span>
+            </button>
+          </Link>
+        ) : (
+          <p className="text-base font-semibold mt-4">
+            Choose different from and to places
+          </p>
+        )}
       </main>
     </>
   )
