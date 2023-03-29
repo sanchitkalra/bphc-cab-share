@@ -17,8 +17,8 @@ export default function Posts() {
         const { data, error } = await supabaseClient
           .from('ride_responses')
           .select(`*, ride_requests(*)`)
-        // .eq('req_user_email', user.email)
-        // .order('id', { ascending: false })
+          .eq('req_user_email', user.email)
+          .order('id', { ascending: false })
 
         console.log(data, error)
         setPosts(data)
@@ -56,7 +56,7 @@ export default function Posts() {
             ) : (
               <div className="mt-4">
                 {posts.map((result: any) => {
-                  const dt = moment(result.time).toDate()
+                  const dt = moment(result.ride_requests.time).toDate()
                   return (
                     <div
                       className="w-80 sm:w-96 mt-4 rounded shadow p-2 border-2"
@@ -65,13 +65,14 @@ export default function Posts() {
                       <div className="flex flex-row justify-between mb-2">
                         <div className="w-3/5 flex flex-col">
                           <h3 className="font-semibold text-xl">
-                            {result.from} <span aria-hidden="true">&rarr;</span>{' '}
-                            {result.to}
+                            {result.ride_requests.from}{' '}
+                            <span aria-hidden="true">&rarr;</span>{' '}
+                            {result.ride_requests.to}
                           </h3>
-                          <h3>{result.user_name}</h3>
+                          <h3>{result.ride_requests.user_name}</h3>
                           <h3>
                             {result.seats} seat{result.seats > 1 && 's'}{' '}
-                            available
+                            requested
                           </h3>
                         </div>
                         <div className="flex flex-col items-end font-semibold w-2/5">
@@ -97,7 +98,7 @@ export default function Posts() {
                         </div>
                       </div>
 
-                      <div className="flex flex-row justify-end w-full">
+                      {/* <div className="flex flex-row justify-end w-full">
                         <Link href={`/post/${result.id}`} className="w-full">
                           <button className="w-full text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
                             SEE REQUESTS{' '}
@@ -106,7 +107,7 @@ export default function Posts() {
                             </span>
                           </button>
                         </Link>
-                      </div>
+                      </div> */}
                     </div>
                   )
                 })}
