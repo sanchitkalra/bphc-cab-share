@@ -123,7 +123,7 @@ export default function SearchResult({
                       ? `0${dt.getMinutes()}`
                       : dt.getMinutes()
 
-                  if (seatsRequested >= result.seats) {
+                  if (seatsRequested > result.seats) {
                     setError(`Select upto ${result.seats} seats`)
                   } else if (seatsRequested <= 0) {
                     setError('Select a valid seat count')
