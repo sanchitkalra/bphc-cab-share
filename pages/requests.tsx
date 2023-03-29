@@ -36,7 +36,7 @@ export default function Posts() {
       {user != null ? (
         <main className="flex flex-col items-center mb-6">
           <h1 className="text-4xl md:text-6xl text-center mt-6 font-bold">
-            Your Posts
+            Your Requests
           </h1>
           {posts != null ? (
             posts.length === 0 ? (
@@ -74,9 +74,13 @@ export default function Posts() {
                             {result.seats} seat{result.seats > 1 && 's'}{' '}
                             requested
                           </h3>
-                          <h3>
+                          {result.approved && (
+                            <h3 className="text-green-500">Approved</h3>
+                          )}
+                          {!result.approved && <h3>Not approved</h3>}
+                          {/* <h3>
                             {result.approved ? 'Approved' : 'Not approved'}
-                          </h3>
+                          </h3> */}
                         </div>
                         <div className="flex flex-col items-end font-semibold w-2/5">
                           <h3>
