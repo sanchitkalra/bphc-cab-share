@@ -27,8 +27,10 @@ export default function SearchResult({
   async function sendResponse(postID: number, time: string, tolerance: number) {
     setProcessing(true)
     const { error } = await supabaseClient.from('ride_responses').insert({
-      user_name: user?.user_metadata.full_name,
-      user_email: user?.email,
+      req_user_name: user?.user_metadata.full_name,
+      req_user_email: user?.email,
+      post_user_name: result.user_name,
+      post_user_email: result.user_email,
       time: new Date(time).getTime(),
       tolerance,
       seats: seatsRequested,

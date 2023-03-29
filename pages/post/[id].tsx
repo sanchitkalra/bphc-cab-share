@@ -171,7 +171,7 @@ export default function Posts() {
                       <div className="flex flex-row justify-between mb-2">
                         <div className="w-3/5 flex flex-col">
                           <h3 className="font-semibold text-xl">
-                            {result.user_name}
+                            {result.req_user_name}
                           </h3>
                           <h3>
                             {result.seats} seat{result.seats > 1 && 's'}{' '}
