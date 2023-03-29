@@ -43,14 +43,14 @@ export default function Posts() {
               <div className="grid h-screen place-items-center">
                 <div className="flex flex-col items-center">
                   <h2 className="font-semibold mb-10">No results</h2>
-                  <Link href={'/'}>
+                  {/* <Link href={'/'}>
                     <button className="text-sm mt-2 inline-block rounded bg-gray-800 px-3 py-1 leading-7 text-white shadow-sm ring-1 ring-gray-800 hover:bg-gray-900 hover:ring-gray-900">
                       POST A REQUEST{' '}
                       <span className="text-white" aria-hidden="true">
                         &rarr;
                       </span>
                     </button>
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
             ) : (

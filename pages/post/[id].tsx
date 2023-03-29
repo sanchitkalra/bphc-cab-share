@@ -218,7 +218,7 @@ export default function Posts() {
 
                                 if (!writeError && !statusError) {
                                   console.log('here')
-                                  let r: any = responses
+                                  let r: any = [...responses]
                                   console.log(r)
                                   let index = responses.findIndex(
                                     (val: any) => val.id == result.id
