@@ -74,6 +74,9 @@ export default function Posts() {
                             {result.seats} seat{result.seats > 1 && 's'}{' '}
                             requested
                           </h3>
+                          <h3>
+                            {result.approved ? 'Approved' : 'Not approved'}
+                          </h3>
                         </div>
                         <div className="flex flex-col items-end font-semibold w-2/5">
                           <h3>
