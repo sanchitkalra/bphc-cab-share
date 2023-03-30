@@ -98,16 +98,20 @@ export default function Home() {
     const getPermission = async () => {
       // init Firebase
       const app = initializeApp(firebaseConfig)
+      console.log(app)
       const messaging = getMessaging(app)
+      console.log(messaging)
 
       // request for permission to send notifications
       const permission = await Notification.requestPermission()
+      console.log(permission)
       // permission was granted
       if (permission === 'granted') {
         // generate a token
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY
         })
+        console.log(token)
         if (token) {
           supabaseClient.from('notifications').insert({
             user_email: user?.email,
