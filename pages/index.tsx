@@ -5,6 +5,9 @@ import { useEffect, useState, Fragment } from 'react'
 import { Combobox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import Link from 'next/link'
+import { firebaseConfig } from '../firebase'
+import { getMessaging, getToken } from 'firebase/messaging'
+import { initializeApp } from 'firebase/app'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -90,6 +93,34 @@ export default function Home() {
             )
     })
   }, [selections.fromQuery, selections.toQuery])
+
+  useEffect(() => {
+    const getPermission = async () => {
+      // init Firebase
+      const app = initializeApp(firebaseConfig)
+      const messaging = getMessaging(app)
+
+      // request for permission to send notifications
+      const permission = await Notification.requestPermission()
+      // permission was granted
+      if (permission === 'granted') {
+        // generate a token
+        const token = await getToken(messaging, {
+          vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY
+        })
+        if (token) {
+          supabaseClient.from('notifications').insert({
+            user_email: user?.email,
+            token
+          })
+        }
+      }
+    }
+
+    if (user != null) {
+      getPermission()
+    }
+  }, [supabaseClient, user])
 
   // useEffect(() => {
   //   console.log('selections => ', selections)
